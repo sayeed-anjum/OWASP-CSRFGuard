@@ -1,9 +1,11 @@
-# OWASP CSRFGuard 3.0
+## OWASP CSRFGuard 3.0
 http://www.owasp.org/index.php/Category:OWASP_CSRFGuard_Project
+
 Eric Sheridan (eric.sheridan@owasp.org), Copyright (c) 2011
+
 BSD License, All rights reserved.
 
-# Overview
+## Overview
 
 Welcome to the home of the OWASP CSRFGuard Project! OWASP CSRFGuard is a library that implements
 a variant of the synchronizer token pattern to mitigate the risk of Cross-Site Request Forgery
@@ -19,7 +21,7 @@ redirecting the user to a landing page. The latest release enhances this strateg
 optional verification of HTTP requests submitted using Ajax as well as the optional verification
 of referrer headers.
 
-# Project Lead
+## Project Lead
 
 Eric Sheridan (eric.sheridan@owasp.org) is the lead and primary developer of the OWASP CSRFGuard
 project. Aside from leading up CSRFGuard, Eric has contributed to or provided guidance
@@ -28,10 +30,10 @@ API (ESAPI). He is a Principal Consultant at Aspect Security specializing in a w
 application security activities including static analysis, penetration tests, code reviews, and
 threat modeling. In his personal time... wait, what is that?
 
-# License
+## License
 
 OWASP CSRFGuard is offered under the BSD license (http://www.opensource.org/licenses/bsd-license.php)
 
-# Email List
+## Email List
 
 You can sign up for the OWASP CSRFGuard email list at https://lists.owasp.org/mailman/listinfo/owasp-csrfguard.
