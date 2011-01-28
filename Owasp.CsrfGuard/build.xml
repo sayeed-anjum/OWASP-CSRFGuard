@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="dist" name="Owasp.CsrfGuard">
+	<target name="version">
+		<buildnumber/>
+	</target>
+	
+	<target name="init">
+		<property name="project.name" value="${ant.project.name}" />
+		<property name="project.version" value="3.0.0" />
+		<property name="bin.dir" location="${basedir}/bin" />
+		<property name="src.dir" location="${basedir}/src" />
+		<property name="dist.dir" location="${basedir}/dist" />
+		<property name="lib.dir" location="${basedir}/lib" />
+		<property name="conf.dir" location="${basedir}/conf"/>
+		<property name="license.file" location="${conf.dir}/License.txt" />
+		<property name="readme.file" location="${conf.dir}/Readme.txt" />
+		<property name="tld.file" location="${conf.dir}/Owasp.CsrfGuard.tld"/>
+		<property name="js.file" location="${conf.dir}/Owasp.CsrfGuard.js"/>
+		<property name="props.file" location="${conf.dir}/Owasp.CsrfGuard.properties"/>
+		
+		<!-- FIXME: set to location of your web application web-inf folder -->
+		<property name="app.webinf.dir" location="../Owasp.CsrfGuard.Test/WebContent/WEB-INF"/>
+	</target>
+	
+	<target name="clean" depends="init" description="delete and create skeleton build directory">
+		<delete dir="${bin.dir}"/>
+		<mkdir dir="${bin.dir}"/>
+	</target>
+
+	<target name="compile" depends="clean" description="Compile the sources">
+		<javac deprecation="yes" destdir="${bin.dir}" listfiles="no" optimize="on" srcdir="${src.dir}" debug="on" source="1.5" target="1.5" includeantruntime="false">
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+		
+	<target name="build" depends="compile" description="Build a jar file" >
+		<mkdir dir="${bin.dir}/META-INF" />
+		<copy file="${license.file}" toDir="${bin.dir}/META-INF" />
+		<copy file="${readme.file}" toDir="${bin.dir}/META-INF" />
+		<copy file="${tld.file}" toDir="${bin.dir}/META-INF"/>
+	</target>
+
+	<target name="dist" depends="version,build" description="Build all distributables">
+		<replace file="${readme.file}" token="1.0.0.0" value="${project.version}.${build.number}" failOnNoReplacements="true" />
+		
+		<jar basedir="${bin.dir}" jarfile="${dist.dir}/${project.name}.jar">
+			<manifest>
+				<attribute name="Project-Lead" value="Eric Sheridan (eric.sheridan@owasp.org)"/>
+				<attribute name="Version" value="${project.version}.${build.number}"/>
+			</manifest>
+		</jar>
+		
+		<copy file="${license.file}" toDir="${dist.dir}"/>
+		<copy file="${readme.file}" toDir="${dist.dir}"/>
+		<copy file="${js.file}" toDir="${dist.dir}"/>
+		<copy file="${props.file}" toDir="${dist.dir}"/>
+		
+		<replace file="${readme.file}" token="${project.version}.${build.number}" value="1.0.0.0" failOnNoReplacements="true" />
+	</target>
+	
+	<target name="deploy" depends="dist">
+		<copy file="${dist.dir}/${project.name}.jar" toDir="${app.webinf.dir}/lib"/>
+		<copy file="${js.file}" toDir="${app.webinf.dir}"/>
+		<copy file="${props.file}" toDir="${app.webinf.dir}"/>
+	</target>
+</project>
