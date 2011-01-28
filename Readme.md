@@ -1,6 +1,6 @@
 ## OWASP CSRFGuard 3.0
 
-[](http://www.owasp.org/index.php/Category:OWASP_CSRFGuard_Project)
+(http://www.owasp.org/index.php/Category:OWASP_CSRFGuard_Project)
 Eric Sheridan (eric.sheridan@owasp.org), Copyright (c) 2011
 BSD License, All rights reserved.
 
