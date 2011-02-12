@@ -40,7 +40,7 @@ public final class TokenTag extends AbstractUriTag {
 
 	@Override
 	public int doStartTag() {
-		HttpSession session = pageContext.getSession();
+		HttpSession session = ((HttpServletRequest)pageContext.getRequest()).getSession(true);
 		CsrfGuard csrfGuard = (CsrfGuard) session.getAttribute(CsrfGuard.SESSION_KEY);
 		String tokenName = csrfGuard.getTokenName();
 

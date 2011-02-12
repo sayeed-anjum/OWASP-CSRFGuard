@@ -40,13 +40,15 @@ import org.owasp.csrfguard.util.*;
 
 public final class CsrfGuard {
 
-	public static String SESSION_KEY = "Owasp_CsrfGuard_Session_Key";
+	public final static String CSRFGUARD_KEY = "Owasp_CsrfGuard_Key";
 	
-	public static String PAGE_TOKENS_KEY = "Owasp_CsrfGuard_Pages_Tokens_Key";
+	public final static String SESSION_KEY = "Owasp_CsrfGuard_Session_Key";
 	
-	private static String ACTION_PREFIX = "org.owasp.csrfguard.action.";
+	public final static String PAGE_TOKENS_KEY = "Owasp_CsrfGuard_Pages_Tokens_Key";
 	
-	private static String UNPROTECTED_PAGE_PREFIX = "org.owasp.csrfguard.unprotected.";
+	private final static String ACTION_PREFIX = "org.owasp.csrfguard.action.";
+	
+	private final static String UNPROTECTED_PAGE_PREFIX = "org.owasp.csrfguard.unprotected.";
 	
 	private ILogger logger = null;
 	
@@ -274,11 +276,7 @@ public final class CsrfGuard {
 
 		return tokenValue;
 	}
-
-	public boolean isFirstRequest(HttpServletRequest request) {
-		return request.getSession(true).getAttribute(getSessionKey()) == null;
-	}
-
+	
 	public boolean isValidRequest(HttpServletRequest request, HttpServletResponse response) {
 		boolean valid = isUnprotectedPage(request.getRequestURI());
 		HttpSession session = request.getSession(true);
@@ -307,7 +305,7 @@ public final class CsrfGuard {
 
 			/** rotate session and page tokens **/
 			if (!isAjaxRequest(request) && isRotateEnabled()) {
-				rotateToken(request);
+				rotateTokens(request);
 			}
 			/** expected token in session - bad state **/
 		} else if (tokenFromSession == null) {
@@ -320,25 +318,30 @@ public final class CsrfGuard {
 		session.setAttribute(CsrfGuard.SESSION_KEY, this);
 		return valid;
 	}
+	
+	public void updateToken(HttpSession session) {
+		String tokenValue = (String) session.getAttribute(getSessionKey());
+
+		/** Generate a new token and store it in the session. **/
+		if (tokenValue == null) {
+			try {
+				tokenValue = RandomGenerator.generateRandomId(getPrng(), getTokenLength());
+			} catch (Exception e) {
+				throw new RuntimeException(String.format("unable to generate the random token - %s", e.getLocalizedMessage()), e);
+			}
+
+			session.setAttribute(getSessionKey(), tokenValue);
+		}
+	}
 
 	public void updateTokens(HttpServletRequest request) {
 		/** cannot create sessions if response already committed **/
 		HttpSession session = request.getSession(false);
 
 		if (session != null) {
-			String tokenValue = (String) session.getAttribute(getSessionKey());
-
-			/** Generate a new token and store it in the session. **/
-			if (tokenValue == null) {
-				try {
-					tokenValue = RandomGenerator.generateRandomId(getPrng(), getTokenLength());
-				} catch (Exception e) {
-					throw new RuntimeException(String.format("unable to generate the random token - %s", e.getLocalizedMessage()), e);
-				}
-
-				session.setAttribute(getSessionKey(), tokenValue);
-			}
-
+			/** create master token if it does not exist **/
+			updateToken(session);
+			
 			/** create page specific token **/
 			if (isTokenPerPageEnabled()) {
 				@SuppressWarnings("unchecked")
@@ -361,14 +364,18 @@ public final class CsrfGuard {
 			}
 		}
 	}
-
-	public void writeLandingPage(HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+	
+	public void writeLandingPage(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String landingPage = getNewTokenLandingPage();
 
 		/** default to current page **/
 		if (landingPage == null) {
-			landingPage = request.getRequestURI();
+			StringBuilder sb = new StringBuilder();
+			
+			sb.append(request.getContextPath());
+			sb.append(request.getServletPath());
+			
+			landingPage = sb.toString();
 		}
 
 		/** create auto posting form **/
@@ -513,7 +520,7 @@ public final class CsrfGuard {
 		}
 	}
 
-	private void rotateToken(HttpServletRequest request) {
+	private void rotateTokens(HttpServletRequest request) {
 		HttpSession session = request.getSession(true);
 
 		/** rotate master token **/

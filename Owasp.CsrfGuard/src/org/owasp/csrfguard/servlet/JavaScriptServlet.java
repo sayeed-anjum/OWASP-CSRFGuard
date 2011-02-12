@@ -120,7 +120,7 @@ public final class JavaScriptServlet extends HttpServlet {
 		HttpSession session = request.getSession(true);
 		@SuppressWarnings("unchecked")
 		Map<String, String> pageTokens = (Map<String, String>) session.getAttribute(CsrfGuard.PAGE_TOKENS_KEY);
-		String pageTokensString = parsePageTokens(pageTokens);
+		String pageTokensString = (pageTokens != null ? parsePageTokens(pageTokens) : Strings.EMPTY);
 
 		/** setup headers **/
 		response.setContentType("text/plain");

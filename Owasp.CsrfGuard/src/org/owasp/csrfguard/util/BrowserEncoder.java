@@ -74,7 +74,7 @@ public final class BrowserEncoder {
 			char c = s.charAt(i);
 			
 			if(c < 256 && !Character.isLetterOrDigit((int)c)) {
-				sb.append("&#x");
+				sb.append("&#");
 				sb.append((int)c);
 				sb.append(';');
 			} else {

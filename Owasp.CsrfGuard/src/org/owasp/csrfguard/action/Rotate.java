@@ -75,7 +75,9 @@ public class Rotate extends AbstractAction {
 		Map<String, String> pageTokens = (Map<String, String>) session.getAttribute(CsrfGuard.PAGE_TOKENS_KEY);
 		List<String> pages = new ArrayList<String>();
 
-		pages.addAll(pageTokens.keySet());
+		if(pageTokens != null) {
+			pages.addAll(pageTokens.keySet());
+		}
 
 		for (String page : pages) {
 			String token = null;

@@ -32,103 +32,45 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import org.owasp.csrfguard.log.LogLevel;
-import org.owasp.csrfguard.util.*;
-
 public final class CsrfGuardFilter implements Filter {
-
-	private final static String CONFIG_PARAM = "config";
 	
-	private final static String PRINT_CONFIG_PARAM = "print-config";
+	private FilterConfig filterConfig = null;
 	
-	private CsrfGuard csrfGuard = null;
-
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
+		/** nothing to do **/
 	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 		/** only work with HttpServletRequest objects **/
 		if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
-			csrfGuard.getLogger().log(String.format("CsrfGuard analyzing request %s", ((HttpServletRequest) request).getRequestURI()));
-
-			doCsrfGuard((HttpServletRequest) request, (HttpServletResponse) response, filterChain);
+			HttpServletRequest httpRequest = (HttpServletRequest)request;
+			HttpServletResponse httpResponse = (HttpServletResponse)response;
+			HttpSession session = httpRequest.getSession(true);
+			
+			CsrfGuard csrfGuard = (CsrfGuard)session.getAttribute(CsrfGuard.CSRFGUARD_KEY);
+			csrfGuard.getLogger().log(String.format("CsrfGuard analyzing request %s", httpRequest.getRequestURI()));
+			
+			if(session.isNew()) {
+				csrfGuard.writeLandingPage(httpRequest, httpResponse);
+			} else if(csrfGuard.isValidRequest(httpRequest, httpResponse)) {
+				filterChain.doFilter(httpRequest, httpResponse);
+			} else {
+				/** invalid request - nothing to do - actions already executed **/
+			}
+			
+			csrfGuard.updateTokens(httpRequest);
 		} else {
-			csrfGuard.getLogger().log(LogLevel.Warning, String.format("CsrfGuard does not know how to work with requests of class %s ", request.getClass().getName()));
+			filterConfig.getServletContext().log(String.format("[WARNING] CsrfGuard does not know how to work with requests of class %s ", request.getClass().getName()));
 			
 			filterChain.doFilter(request, response);
 		}
 	}
-
-	private void doCsrfGuard(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-		if (csrfGuard.isFirstRequest(request)) {
-			csrfGuard.updateTokens(request);
-			csrfGuard.writeLandingPage(request, response);
-		} else if (csrfGuard.isValidRequest(request, response)) {
-			csrfGuard.updateTokens(request);
-			filterChain.doFilter(request, response);
-		}
-	}
-
+	
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		String config = filterConfig.getInitParameter(CONFIG_PARAM);
-		ServletContext context = filterConfig.getServletContext();
-
-		if (config == null) {
-			throw new ServletException(String.format("failure to specify filter init-param - %s", CONFIG_PARAM));
-		}
-
-		InputStream is = null;
-
-		try {
-			is = getResourceStream(config, context);
-			csrfGuard = CsrfGuard.newInstance(is);
-		} catch (Exception e) {
-			throw new ServletException(e);
-		} finally {
-			Streams.close(is);
-		}
-
-		String printConfig = filterConfig.getInitParameter(PRINT_CONFIG_PARAM);
-
-		if (printConfig != null && Boolean.parseBoolean(printConfig)) {
-			filterConfig.getServletContext().log(String.valueOf(csrfGuard));
-		}
+	public void init(@SuppressWarnings("hiding") FilterConfig filterConfig) throws ServletException {
+		this.filterConfig = filterConfig;
 	}
-
-	private InputStream getResourceStream(String resourceName, ServletContext context) throws IOException {
-		InputStream is = null;
-
-		/** try classpath **/
-		is = getClass().getClassLoader().getResourceAsStream(resourceName);
-
-		/** try web context **/
-		if (is == null) {
-			String fileName = context.getRealPath(resourceName);
-			File file = new File(fileName);
-
-			if (file.exists()) {
-				is = new FileInputStream(fileName);
-			}
-		}
-
-		/** try current directory **/
-		if (is == null) {
-			File file = new File(resourceName);
-
-			if (file.exists()) {
-				is = new FileInputStream(resourceName);
-			}
-		}
-
-		/** fail if still empty **/
-		if (is == null) {
-			throw new IOException(String.format("unable to locate resource - %s", resourceName));
-		}
-
-		return is;
-	}
+	
 }

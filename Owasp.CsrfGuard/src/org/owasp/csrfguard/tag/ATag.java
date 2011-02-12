@@ -46,7 +46,7 @@ public final class ATag extends AbstractUriTag implements DynamicAttributes {
 
 	@Override
 	public int doStartTag() {
-		HttpSession session = pageContext.getSession();
+		HttpSession session = ((HttpServletRequest)pageContext.getRequest()).getSession(true);
 		CsrfGuard csrfGuard = (CsrfGuard) session.getAttribute(CsrfGuard.SESSION_KEY);
 		String tokenValue = csrfGuard.getTokenValue((HttpServletRequest) pageContext.getRequest(), buildUri(attributes.get("href")));
 

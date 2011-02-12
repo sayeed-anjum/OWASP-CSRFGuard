@@ -180,7 +180,7 @@
 		} else if(src.charAt(0) == '#') {
 			result = false;
 			/** ensure it is a local resource without a protocol * */
-		} else if(src.charAt(0) == '/' || src.indexOf(':') == -1) {
+		} else if(!src.startsWith("//") && (src.charAt(0) == '/' || src.indexOf(':') == -1)) {
 			result = true;
 		}
 		
