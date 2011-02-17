@@ -49,7 +49,7 @@ public final class CsrfGuardFilter implements Filter {
 			HttpServletResponse httpResponse = (HttpServletResponse)response;
 			HttpSession session = httpRequest.getSession(true);
 			
-			CsrfGuard csrfGuard = (CsrfGuard)session.getAttribute(CsrfGuard.CSRFGUARD_KEY);
+			CsrfGuard csrfGuard = (CsrfGuard)session.getAttribute(CsrfGuard.SESSION_KEY);
 			csrfGuard.getLogger().log(String.format("CsrfGuard analyzing request %s", httpRequest.getRequestURI()));
 			
 			if(session.isNew()) {

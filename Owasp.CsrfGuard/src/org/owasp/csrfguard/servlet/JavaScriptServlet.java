@@ -94,11 +94,7 @@ public final class JavaScriptServlet extends HttpServlet {
 		String refererHeader = request.getHeader("referer");
 		
 		if(refererPattern == null || (refererHeader != null && refererPattern.matcher(refererHeader).matches())) {
-			if (request.getSession(true).getAttribute(CsrfGuard.SESSION_KEY) != null) {
-				writeJavaScript(request, response);
-			} else {
-				response.sendError(404);
-			}
+			writeJavaScript(request, response);
 		} else {
 			response.sendError(404);
 		}

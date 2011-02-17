@@ -40,8 +40,6 @@ import org.owasp.csrfguard.util.*;
 
 public final class CsrfGuard {
 
-	public final static String CSRFGUARD_KEY = "Owasp_CsrfGuard_Key";
-	
 	public final static String SESSION_KEY = "Owasp_CsrfGuard_Session_Key";
 	
 	public final static String PAGE_TOKENS_KEY = "Owasp_CsrfGuard_Pages_Tokens_Key";
@@ -509,7 +507,7 @@ public final class CsrfGuard {
 	private void verifySessionToken(HttpServletRequest request) throws CsrfGuardException {
 		HttpSession session = request.getSession(true);
 		String tokenFromSession = (String) session.getAttribute(getSessionKey());
-		String tokenFromRequest = request.getParameter(getSessionKey());
+		String tokenFromRequest = request.getParameter(getTokenName());
 
 		if (tokenFromRequest == null) {
 			/** FAIL: token is missing from the request **/

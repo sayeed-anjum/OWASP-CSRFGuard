@@ -62,9 +62,7 @@ public class Rotate extends AbstractAction {
 			token = RandomGenerator.generateRandomId(csrfGuard.getPrng(),
 					csrfGuard.getTokenLength());
 		} catch (Exception e) {
-			throw new CsrfGuardException(String.format(
-					"unable to generate the random token - %s",
-					e.getLocalizedMessage()), e);
+			throw new CsrfGuardException(String.format("unable to generate the random token - %s", e.getLocalizedMessage()), e);
 		}
 
 		session.setAttribute(csrfGuard.getSessionKey(), token);
