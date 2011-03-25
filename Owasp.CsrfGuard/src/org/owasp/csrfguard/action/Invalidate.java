@@ -34,6 +34,8 @@ import org.owasp.csrfguard.*;
 
 public final class Invalidate extends AbstractAction {
 
+	private static final long serialVersionUID = -3060679616261531773L;
+
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response, CsrfGuardException csrfe, CsrfGuard csrfGuard) throws CsrfGuardException {
 		HttpSession session = request.getSession(false);

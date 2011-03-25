@@ -28,7 +28,9 @@
  */
 package org.owasp.csrfguard.log;
 
-public interface ILogger {
+import java.io.Serializable;
+
+public interface ILogger extends Serializable {
 
 	public void log(String msg);
 

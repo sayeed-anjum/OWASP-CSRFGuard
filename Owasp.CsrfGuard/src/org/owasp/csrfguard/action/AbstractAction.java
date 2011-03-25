@@ -32,6 +32,8 @@ import java.util.*;
 
 public abstract class AbstractAction implements IAction {
 
+	private static final long serialVersionUID = -1654117674049587348L;
+
 	private String name = null;
 	
 	private Map<String, String> parameters = new HashMap<String, String>();

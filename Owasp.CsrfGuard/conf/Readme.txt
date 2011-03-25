@@ -24,7 +24,7 @@ of referrer headers.
 Eric Sheridan (eric.sheridan@owasp.org) is the lead and primary developer of the OWASP CSRFGuard
 project. Aside from leading up CSRFGuard, Eric has contributed to or provided guidance
 on numerous other OWASP projects including WebGoat, Stinger, CSRFTester, and Enterprise Security
-API (ESAPI). He is a Principal Consultant at Aspect Security specializing in a wide variety of
+API (ESAPI). He is an independent Application Security Consultant specializing in a wide variety of
 application security activities including static analysis, penetration tests, code reviews, and
 threat modeling. In his personal time... wait, what is that?
 

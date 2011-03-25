@@ -28,13 +28,14 @@
  */
 package org.owasp.csrfguard.action;
 
+import java.io.Serializable;
 import java.util.*;
 
 import javax.servlet.http.*;
 
 import org.owasp.csrfguard.*;
 
-public interface IAction {
+public interface IAction extends Serializable {
 
 	public void setName(String name);
 

@@ -39,6 +39,8 @@ import org.owasp.csrfguard.CsrfGuardException;
 
 public final class Forward extends AbstractAction {
 
+	private static final long serialVersionUID = -3727752206497452347L;
+
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response, CsrfGuardException csrfe, CsrfGuard csrfGuard) throws CsrfGuardException {
 		String errorPage = getParameter("Page");

@@ -27,7 +27,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 (function() {
-	/** string utility functions * */
+	/** string utility functions **/
 	String.prototype.startsWith = function(prefix) {
 		return this.indexOf(prefix) === 0;
 	}
@@ -36,7 +36,7 @@
 		return this.match(suffix+"$") == suffix;
 	};
 
-	/** hook using standards based prototype * */
+	/** hook using standards based prototype **/
 	function hijackStandard() {
 		XMLHttpRequest.prototype._open = XMLHttpRequest.prototype.open;
 		XMLHttpRequest.prototype.open = function(method, url, async, user, pass) {
@@ -55,7 +55,7 @@
 		}
 	}
 
-	/** ie does not properly support prototype - wrap completely * */
+	/** ie does not properly support prototype - wrap completely **/
 	function hijackExplorer() {
 		var _XMLHttpRequest = window.XMLHttpRequest;
 		
@@ -69,14 +69,14 @@
 		
 		init_XMLHttpRequest.prototype = alloc_XMLHttpRequest.prototype;
 		
-		/** constants * */
+		/** constants **/
 		init_XMLHttpRequest.UNSENT = 0;
 		init_XMLHttpRequest.OPENED = 1;
 		init_XMLHttpRequest.HEADERS_RECEIVED = 2;
 		init_XMLHttpRequest.LOADING = 3;
 		init_XMLHttpRequest.DONE = 4;
 		
-		/** properties * */
+		/** properties **/
 		init_XMLHttpRequest.prototype.status = 0;
 		init_XMLHttpRequest.prototype.statusText = "";
 		init_XMLHttpRequest.prototype.readyState = init_XMLHttpRequest.UNSENT;
@@ -87,12 +87,10 @@
 		init_XMLHttpRequest.url = null;
 		init_XMLHttpRequest.onreadystatechange = null;
 
-		/** methods * */
+		/** methods **/
 		init_XMLHttpRequest.prototype.open = function(method, url, async, user, pass) {
 			var self = this;
 			this.url = url;
-			
-			this.base.open(method, url, async, user, pass);
 			
 			this.base.onreadystatechange = function() {
 				try { self.status = self.base.status; } catch (e) { }
@@ -105,6 +103,8 @@
 					self.onreadystatechange.apply(this, arguments);
 				}
 			}
+			
+			this.base.open(method, url, async, user, pass);
 		}
 		
 		init_XMLHttpRequest.prototype.send = function(data) {
@@ -131,15 +131,15 @@
 			return this.base.setRequestHeader(name, value);
 		}
 		
-		/** hook * */
+		/** hook **/
 		window.XMLHttpRequest = init_XMLHttpRequest;
 	}
 
-	/** check if valid domain based on domainStrict * */
+	/** check if valid domain based on domainStrict **/
 	function isValidDomain(current, target) {
 		var result = false;
 		
-		/** check exact or subdomain match * */
+		/** check exact or subdomain match **/
 		if(current == target) {
 			result = true;
 		} else if(%DOMAIN_STRICT% == false) {
@@ -153,18 +153,18 @@
 		return result;
 	}
 
-	/** determine if uri/url points to valid domain * */
+	/** determine if uri/url points to valid domain **/
 	function isValidUrl(src) {
 		var result = false;
 		
-		/** parse out domain to make sure it points to our own * */
+		/** parse out domain to make sure it points to our own **/
 		if(src.substring(0, 7) == "http://" || src.substring(0, 8) == "https://") {
 			var token = "://";
 			var index = src.indexOf(token);
 			var part = src.substring(index + token.length);
 			var domain = "";
 			
-			/** parse up to end, first slash, or anchor * */
+			/** parse up to end, first slash, or anchor **/
 			for(i=0; i<part.length; i++) {
 				var character = part.charAt(i);
 				
@@ -176,10 +176,10 @@
 			}
 			
 			result = isValidDomain(document.domain, domain);
-			/** explicitly skip anchors * */
+			/** explicitly skip anchors **/
 		} else if(src.charAt(0) == '#') {
 			result = false;
-			/** ensure it is a local resource without a protocol * */
+			/** ensure it is a local resource without a protocol **/
 		} else if(!src.startsWith("//") && (src.charAt(0) == '/' || src.indexOf(':') == -1)) {
 			result = true;
 		}
@@ -187,7 +187,7 @@
 		return result;
 	}
 
-	/** parse uri from url * */
+	/** parse uri from url **/
 	function parseUri(url) {
 		var uri = "";
 		var token = "://";
@@ -207,7 +207,7 @@
 			part = url;
 		}
 		
-		/** parse up to end or query string * */
+		/** parse up to end or query string **/
 		var uriContext = (index == -1);
 		
 		for(var i=0; i<part.length; i++) {
@@ -228,7 +228,7 @@
 		return uri;
 	}
 
-	/** inject tokens as hidden fields into forms * */
+	/** inject tokens as hidden fields into forms **/
 	function injectTokenForm(form, tokenName, tokenValue, pageTokens) {
 		var action = form.getAttribute("action");
 		
@@ -244,16 +244,13 @@
 		}
 	}
 
-	/** inject tokens as query string parameters into url * */
+	/** inject tokens as query string parameters into url **/
 	function injectTokenAttribute(element, attr, tokenName, tokenValue, pageTokens) {
 		var location = element.getAttribute(attr);
 		
 		if(location != null && isValidUrl(location)) {
 			var uri = parseUri(location);
 			var value = (pageTokens[uri] != null ? pageTokens[uri] : tokenValue);
-			
-			// alert("injectTokenAttribute: location=" + location + " uri=" +
-			// uri + " value=" + value);
 			
 			if(location.indexOf('?') != -1) {
 				location = location + '&' + tokenName + '=' + value;
@@ -269,21 +266,28 @@
 		}
 	}
 
-	/** inject csrf prevention tokens throughout dom * */
-	function injectTokens(tokenName, tokenValue, pageTokens) {
-		/** iterate over all elements and injection token * */
+	/** inject csrf prevention tokens throughout dom **/
+	function injectTokens(tokenName, tokenValue) {
+		/** obtain reference to page tokens if enabled **/
+		var pageTokens = {};
+		
+		if(%TOKENS_PER_PAGE% == true) {
+			pageTokens = requestPageTokens();
+		}
+		
+		/** iterate over all elements and injection token **/
 		var all = document.all ? document.all : document.getElementsByTagName('*');
 		var len = all.length;
 
 		for(var i=0; i<len; i++) {
 			var element = all[i];
 			
-			/** inject into form * */
+			/** inject into form **/
 			if(element.tagName.toLowerCase() == "form") {
 				if(%INJECT_FORMS% == true) {
 					injectTokenForm(element, tokenName, tokenValue, pageTokens);
 				}
-				/** inject into attribute * */
+				/** inject into attribute **/
 			} else if(%INJECT_ATTRIBUTES% == true) {
 				injectTokenAttribute(element, "src", tokenName, tokenValue, pageTokens);
 				injectTokenAttribute(element, "href", tokenName, tokenValue, pageTokens);
@@ -291,18 +295,15 @@
 		}
 	}
 
-	/** obtain array of page specific tokens * */
+	/** obtain array of page specific tokens **/
 	function requestPageTokens() {
-		var xhr = new XMLHttpRequest();
+		var xhr = window.XMLHttpRequest ? new window.XMLHttpRequest : new window.ActiveXObject("Microsoft.XMLHTTP");
 		var pageTokens = {};
 		
 		xhr.open("POST", "%SERVLET_PATH%", false);
 		xhr.send(null);
 		
 		var text = xhr.responseText;
-		// alert("master: %TOKEN_VALUE%");
-		// alert("requestPageTokens: " + text);
-		
 		var name = "";
 		var value = "";
 		var nameContext = true;
@@ -331,7 +332,7 @@
 		return pageTokens;
 	}
 
-	/** utility method to register window.onload * */
+	/** utility method to register window.onload **/
 	function addLoadEvent(func) {
 		var oldonload = window.onload;
 		
@@ -352,7 +353,7 @@
 	 * techniques.
 	 */
 	if(isValidDomain(document.domain, "%DOMAIN_ORIGIN%")) {
-		/** optionally include Ajax support * */
+		/** optionally include Ajax support **/
 		if(%INJECT_XHR% == true) {
 			if(navigator.appName == "Microsoft Internet Explorer") {
 				hijackExplorer();
@@ -368,9 +369,11 @@
 			};
 		}
 		
-		/** update nodes in DOM after load * */
+		/** update nodes in DOM after load **/
 		addLoadEvent(function() {
-			injectTokens("%TOKEN_NAME%", "%TOKEN_VALUE%", requestPageTokens());
+			injectTokens("%TOKEN_NAME%", "%TOKEN_VALUE%");
 		});
+	} else {
+		alert("OWASP CSRFGuard JavaScript was included from within an unauthorized domain!");
 	}
 })();

@@ -29,8 +29,12 @@
 package org.owasp.csrfguard;
 
 import java.io.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
+
+import org.owasp.csrfguard.http.InterceptRedirectResponse;
+import org.owasp.csrfguard.http.MultipartHttpServletRequest;
 
 public final class CsrfGuardFilter implements Filter {
 	
@@ -46,21 +50,45 @@ public final class CsrfGuardFilter implements Filter {
 		/** only work with HttpServletRequest objects **/
 		if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
 			HttpServletRequest httpRequest = (HttpServletRequest)request;
-			HttpServletResponse httpResponse = (HttpServletResponse)response;
+			InterceptRedirectResponse redirectResponse = new InterceptRedirectResponse((HttpServletResponse)response);
 			HttpSession session = httpRequest.getSession(true);
 			
 			CsrfGuard csrfGuard = (CsrfGuard)session.getAttribute(CsrfGuard.SESSION_KEY);
 			csrfGuard.getLogger().log(String.format("CsrfGuard analyzing request %s", httpRequest.getRequestURI()));
 			
+			if(MultipartHttpServletRequest.isMultipartRequest(httpRequest)) {
+				httpRequest = new MultipartHttpServletRequest(httpRequest);
+			}
+			
 			if(session.isNew()) {
-				csrfGuard.writeLandingPage(httpRequest, httpResponse);
-			} else if(csrfGuard.isValidRequest(httpRequest, httpResponse)) {
-				filterChain.doFilter(httpRequest, httpResponse);
+				csrfGuard.writeLandingPage(httpRequest, redirectResponse);
+			} else if(csrfGuard.isValidRequest(httpRequest, redirectResponse)) {
+				filterChain.doFilter(httpRequest, redirectResponse);
 			} else {
 				/** invalid request - nothing to do - actions already executed **/
 			}
 			
+			/** update tokens **/
 			csrfGuard.updateTokens(httpRequest);
+			
+			/** ensure token included in redirects **/
+			if(redirectResponse.getLocation() != null) {
+				String location = redirectResponse.getLocation();
+				
+				if(!location.contains("://") && !csrfGuard.isUnprotectedPage(location)) {
+					if(!location.startsWith("/")) {
+						location = filterConfig.getServletContext().getContextPath() + "/" + location;
+					}
+					
+					String tokenValue = csrfGuard.getTokenValue(httpRequest, location);
+					redirectResponse.sendRedirect(location, csrfGuard.getTokenName(), tokenValue);
+				} else {
+					csrfGuard.getLogger().log(String.format("CsrfGuard skipping redirect token injection for location %s", location));
+					
+					redirectResponse.getResponse().sendRedirect(location);
+				}
+			}
+			
 		} else {
 			filterConfig.getServletContext().log(String.format("[WARNING] CsrfGuard does not know how to work with requests of class %s ", request.getClass().getName()));
 			

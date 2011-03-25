@@ -32,6 +32,8 @@ import java.util.*;
 
 public class ConsoleLogger implements ILogger {
 
+	private static final long serialVersionUID = 3139970112597740777L;
+
 	@Override
 	public void log(String msg) {
 		log(LogLevel.Info, msg);

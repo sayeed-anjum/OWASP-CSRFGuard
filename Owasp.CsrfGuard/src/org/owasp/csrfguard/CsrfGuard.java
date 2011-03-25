@@ -38,7 +38,9 @@ import org.owasp.csrfguard.action.*;
 import org.owasp.csrfguard.log.*;
 import org.owasp.csrfguard.util.*;
 
-public final class CsrfGuard {
+public final class CsrfGuard implements Serializable {
+
+	private static final long serialVersionUID = 2621580348137545167L;
 
 	public final static String SESSION_KEY = "Owasp_CsrfGuard_Session_Key";
 	
@@ -152,10 +154,10 @@ public final class CsrfGuard {
 				String directive = key.substring(UNPROTECTED_PAGE_PREFIX.length());
 				int index = directive.indexOf('.');
 
-				/** action name/class **/
+				/** page name/class **/
 				if (index < 0) {
 					String pageUri = properties.getProperty(key);
-
+					
 					csrfGuard.getUnprotectedPages().add(pageUri);
 				}
 			}
@@ -248,7 +250,7 @@ public final class CsrfGuard {
 	public List<IAction> getActions() {
 		return actions;
 	}
-
+	
 	public String getTokenValue(HttpServletRequest request) {
 		return getTokenValue(request, request.getRequestURI());
 	}
@@ -545,7 +547,7 @@ public final class CsrfGuard {
 		}
 	}
 
-	private boolean isUnprotectedPage(String uri) {
+	public boolean isUnprotectedPage(String uri) {
 		boolean retval = false;
 
 		for (String unprotectedPage : unprotectedPages) {
@@ -554,7 +556,7 @@ public final class CsrfGuard {
 				break;
 			}
 		}
-
+		
 		return retval;
 	}
 

@@ -34,6 +34,8 @@ import org.owasp.csrfguard.*;
 
 public final class SessionAttribute extends AbstractAction {
 
+	private static final long serialVersionUID = 1367492926060283228L;
+
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response, CsrfGuardException csrfe, CsrfGuard csrfGuard) throws CsrfGuardException {
 		String attributeName = getParameter("AttributeName");

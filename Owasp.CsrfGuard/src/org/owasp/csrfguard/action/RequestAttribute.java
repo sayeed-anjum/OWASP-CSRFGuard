@@ -36,6 +36,8 @@ import org.owasp.csrfguard.CsrfGuardException;
 
 public final class RequestAttribute extends AbstractAction {
 
+	private static final long serialVersionUID = 6714855990116387348L;
+
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response, CsrfGuardException csrfe, CsrfGuard csrfGuard) throws CsrfGuardException {
 		String attributeName = getParameter("AttributeName");

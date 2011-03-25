@@ -36,6 +36,8 @@ import org.owasp.csrfguard.CsrfGuardException;
 
 public final class Empty extends AbstractAction {
 
+	private static final long serialVersionUID = 3530383602177340966L;
+
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response, CsrfGuardException csrfe, CsrfGuard csrfGuard) throws CsrfGuardException {
 		// nothing to do

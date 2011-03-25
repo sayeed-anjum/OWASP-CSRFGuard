@@ -61,6 +61,8 @@ public final class JavaScriptServlet extends HttpServlet {
 	
 	private static final String X_REQUESTED_WITH_IDENTIFIER = "%X_REQUESTED_WITH%";
 	
+	private static final String TOKENS_PER_PAGE_IDENTIFIER = "%TOKENS_PER_PAGE%";
+	
 	private String templateCode = null;
 	
 	private String sourceFile = null;
@@ -82,7 +84,7 @@ public final class JavaScriptServlet extends HttpServlet {
 		sourceFile = getInitParameter(servletConfig, "source-file", "WEB-INF/Owasp.CsrfGuard.js");
 		domainStrict = getInitParameter(servletConfig, "domain-strict", "true");
 		cacheControl = getInitParameter(servletConfig, "cache-control", "private, maxage=28800");
-		refererPattern = Pattern.compile(getRequiredInitParameter(servletConfig, "referer-pattern"));
+		refererPattern = Pattern.compile(getInitParameter(servletConfig, "referer-pattern", ".*"));
 		injectIntoForms = getInitParameter(servletConfig, "inject-into-forms", "true");
 		injectIntoAttributes = getInitParameter(servletConfig, "inject-into-attributes", "true");
 		xRequestedWith = getInitParameter(servletConfig, "x-requested-with", "OWASP CSRFGuard Project");
@@ -93,7 +95,7 @@ public final class JavaScriptServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String refererHeader = request.getHeader("referer");
 		
-		if(refererPattern == null || (refererHeader != null && refererPattern.matcher(refererHeader).matches())) {
+		if(refererHeader == null || refererPattern.matcher(refererHeader).matches()) {
 			writeJavaScript(request, response);
 		} else {
 			response.sendError(404);
@@ -157,6 +159,7 @@ public final class JavaScriptServlet extends HttpServlet {
 		code = code.replaceAll(INJECT_INTO_FORMS_IDENTIFIER, injectIntoForms);
 		code = code.replaceAll(INJECT_INTO_ATTRIBUTES_IDENTIFIER, injectIntoAttributes);
 		code = code.replaceAll(INJECT_INTO_XHR_IDENTIFIER, String.valueOf(csrfGuard.isAjaxEnabled()));
+		code = code.replaceAll(TOKENS_PER_PAGE_IDENTIFIER, String.valueOf(csrfGuard.isTokenPerPageEnabled()));
 		code = code.replaceAll(DOMAIN_ORIGIN_IDENTIFIER, parseDomain(request.getRequestURL()));
 		code = code.replaceAll(DOMAIN_STRICT_IDENTIFIER, domainStrict);
 		code = code.replaceAll(CONTEXT_PATH_IDENTIFIER, request.getContextPath());
@@ -198,17 +201,7 @@ public final class JavaScriptServlet extends HttpServlet {
 
 		return sb.toString();
 	}
-
-	private String getRequiredInitParameter(ServletConfig servletConfig, String name) {
-		String value = servletConfig.getInitParameter(name);
-
-		if (value == null) {
-			throw new RuntimeException(String.format("missing required parameter %s", name));
-		}
-
-		return value;
-	}
-
+	
 	private String getInitParameter(ServletConfig servletConfig, String name, String defaultValue) {
 		String value = servletConfig.getInitParameter(name);
 

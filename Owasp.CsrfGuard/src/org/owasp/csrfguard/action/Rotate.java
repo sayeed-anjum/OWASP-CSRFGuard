@@ -42,6 +42,8 @@ import org.owasp.csrfguard.util.RandomGenerator;
 
 public class Rotate extends AbstractAction {
 
+	private static final long serialVersionUID = -3164557586544451406L;
+
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response, CsrfGuardException csrfe, CsrfGuard csrfGuard) throws CsrfGuardException {
 		HttpSession session = request.getSession(false);
@@ -85,7 +87,7 @@ public class Rotate extends AbstractAction {
 			} catch (Exception e) {
 				throw new CsrfGuardException(String.format("unable to generate the random token - %s", e.getLocalizedMessage()), e);
 			}
-
+			
 			pageTokens.put(page, token);
 		}
 	}
