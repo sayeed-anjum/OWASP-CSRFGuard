@@ -12,7 +12,7 @@ Welcome to the home of the OWASP CSRFGuard Project! OWASP CSRFGuard is a library
 
 ## Project Lead
 
-Eric Sheridan [(eric.sheridan@owasp.org)](mailto:eric.sheridan@owasp.org) is the lead and primary developer of the OWASP CSRFGuard project. Aside from leading up CSRFGuard, Eric has contributed to or provided guidance on numerous other OWASP projects including CSRF Prevention Cheat Sheet, WebGoat, Stinger, CSRFTester, and Enterprise Security API (ESAPI). He is a Principal Consultant at Aspect Security specializing in a wide variety of application security activities including static analysis, penetration tests, code reviews, and threat modeling. In his personal time... wait, what is that?
+Eric Sheridan [(eric.sheridan@owasp.org)](mailto:eric.sheridan@owasp.org) is the lead and primary developer of the OWASP CSRFGuard project. Aside from leading up CSRFGuard, Eric has contributed to or provided guidance on numerous other OWASP projects including CSRF Prevention Cheat Sheet, WebGoat, Stinger, CSRFTester, and Enterprise Security API (ESAPI). He is an independent application security consultant specializing in a wide variety of application security activities including static analysis, penetration tests, code reviews, and threat modeling. In his personal time... wait, what is that?
 
 ## License
 
